@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optometry Competitor Exclusion Tool | North Media</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h2 {
+            color: #2C3E50;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #2980B9;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1C5980;
+        }
+        .competitor-list {
+            text-align: left;
+            padding: 10px;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>North Media | Optometry Competitor Exclusion Tool</h2>
+        <p>Generate a list of competitors in your city for Google Ads negative keywords.</p>
+        <form method="post">
+            <label for="city">Enter Your City:</label>
+            <input type="text" name="city" required>
+            <label for="email">Enter Your Email:</label>
+            <input type="email" name="email" required>
+            <label for="client_practice_name">Your Practice Name (to exclude from results):</label>
+            <input type="text" name="client_practice_name" required>
+            <button type="submit">Find Competitors</button>
+        </form>
+
+        {% if competitors %}
+        <h3>Competitor Names:</h3>
+        <div class="competitor-list">
+            <ul>
+                {% for competitor in competitors %}
+                    <li>{{ competitor }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <form action="/download" method="post">
+            {% for competitor in competitors %}
+                <input type="hidden" name="competitors" value="{{ competitor }}">
+            {% endfor %}
+            <button type="submit">Download Negative Keyword List</button>
+        </form>
+        {% else %}
+        <p>No results found. Try another city.</p>
+        {% endif %}
+    </div>
+    <footer>
+        &copy; 2025 North Media | Helping Optometrists Grow Their Practices
+    </footer>
+</body>
+</html>
