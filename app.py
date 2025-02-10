@@ -23,7 +23,6 @@ def format_phrase_match(name):
 # Function to check if two names are similar
 def is_similar(name1, name2, threshold=0.6):  # Adjusted threshold to be less strict
     return difflib.SequenceMatcher(None, name1.lower(), name2.lower()).ratio() > threshold
-
 # Function to fetch optometry practices in a city with pagination handling
 def get_optometry_practices(city, client_practice_name):
     url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query=optometrists+in+{city}&key={GOOGLE_PLACES_API_KEY}"
@@ -60,16 +59,24 @@ def get_optometry_practices(city, client_practice_name):
 
     return list(set(filtered_competitors))  # Ensure no duplicate names
 
+# Function to save form data to a CSV file
+def save_to_csv(city, email, client_practice_name):
+    with open("submissions.csv", mode="a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([city, email, client_practice_name])
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
         competitors = []
         if request.method == 'POST':
-            city = request.form.get('city', '').strip()  # Get city safely
-            email = request.form.get('email', '').strip()  # Get email safely
-            client_practice_name = request.form.get('client_practice_name', '').strip()  # Get client practice name safely
-            
-            print(f"✅ Form Received - City: {city}, Email: {email}, Client Practice: {client_practice_name}")  # Debugging form input
+            city = request.form.get('city', '').strip()
+            email = request.form.get('email', '').strip()
+            client_practice_name = request.form.get('client_practice_name', '').strip()
+
+            # Save form data to CSV
+            save_to_csv(city, email, client_practice_name)
+            print(f"✅ Form Saved - City: {city}, Email: {email}, Client Practice: {client_practice_name}")
 
             if city and email and client_practice_name:
                 competitors = get_optometry_practices(city, client_practice_name)
