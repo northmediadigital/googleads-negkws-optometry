@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import requests
 import os
 import csv
@@ -23,6 +23,7 @@ def format_phrase_match(name):
 # Function to check if two names are similar
 def is_similar(name1, name2, threshold=0.6):  # Adjusted threshold to be less strict
     return difflib.SequenceMatcher(None, name1.lower(), name2.lower()).ratio() > threshold
+
 # Function to fetch optometry practices in a city with pagination handling
 def get_optometry_practices(city, client_practice_name):
     url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query=optometrists+in+{city}&key={GOOGLE_PLACES_API_KEY}"
@@ -61,9 +62,20 @@ def get_optometry_practices(city, client_practice_name):
 
 # Function to save form data to a CSV file
 def save_to_csv(city, email, client_practice_name):
-    with open("submissions.csv", mode="a", newline="") as file:
+    file_path = "submissions.csv"
+
+    # Create file with headers if it doesn't exist
+    if not os.path.exists(file_path):
+        with open(file_path, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["City", "Email", "Practice Name"])  # Add headers
+
+    # Append data
+    with open(file_path, mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([city, email, client_practice_name])
+
+    print(f"✅ Data saved: {city}, {email}, {client_practice_name}")
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -74,18 +86,16 @@ def index():
             email = request.form.get('email', '').strip()
             client_practice_name = request.form.get('client_practice_name', '').strip()
 
-            # Save form data to CSV
-            save_to_csv(city, email, client_practice_name)
-            print(f"✅ Form Saved - City: {city}, Email: {email}, Client Practice: {client_practice_name}")
-
             if city and email and client_practice_name:
+                save_to_csv(city, email, client_practice_name)  # Save form data
+                print("✅ Form data processed and saved!")
                 competitors = get_optometry_practices(city, client_practice_name)
 
         return render_template('index.html', competitors=competitors)  # Ensures Flask looks in the templates folder
     
     except Exception as e:
         print(f"❌ Error: {str(e)}")  # Debugging error message
-        return f"Error: {str(e)}"  # Show error on page for debugging
+        return f"Error: {str(e)}"
 
 @app.route('/download', methods=['POST'])
 def download():
